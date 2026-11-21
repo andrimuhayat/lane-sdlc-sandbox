@@ -1,0 +1,55 @@
+#!/bin/bash
+# pre-push: run the lane gate on every branch pushed, except main.
+# Enable once per clone: git config core.hooksPath .githooks
+#
+# The gate script comes from the remote's main, so a branch cannot change the
+# gate that judges it. A push to main from a Claude Code session (CLAUDECODE
+# set) is blocked. A human's push to main skips the gate: main changes through
+# reviewed PRs, and the protect-main ruleset (G7) blocks direct pushes on GitHub.
+# Until the remote main holds the gate, every branch push fails here; a human
+# pushes the install branch once with --no-verify.
+
+remote="$1"
+zero=0000000000000000000000000000000000000000
+input=$(cat)
+[ -n "$input" ] || exit 0
+
+gitdir=$(cd "$(git rev-parse --git-common-dir)" && pwd) || exit 1
+mkdir -p "$gitdir/gate"
+status=0
+base=""
+
+while read -r _ local_sha remote_ref _ <&3; do
+  [ -n "$local_sha" ] || continue
+  [ "$local_sha" = "$zero" ] && continue          # branch deletion
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    if [ -n "${CLAUDECODE:-}" ]; then
+      echo "gate: a Claude Code session may not push main; push a branch and open a PR" >&2
+      status=1
+      continue
+    fi
+    echo "gate: push to main, gate skipped" >&2
+    continue
+  fi
+  if [ -z "$base" ]; then
+    if ! git fetch --quiet "$remote" refs/heads/main < /dev/null; then
+      echo "gate: cannot fetch main from $remote; push blocked" >&2
+      exit 1
+    fi
+    base=$(git rev-parse --verify --quiet 'FETCH_HEAD^{commit}') || { echo "gate: $remote has no main; push blocked" >&2; exit 1; }
+  fi
+  gate="$gitdir/gate/local-gate-$$.sh"
+  if ! git show "$base:.github/scripts/local-gate.sh" > "$gate" 2>/dev/null; then
+    echo "gate: $remote main has no .github/scripts/local-gate.sh; push blocked." >&2
+    echo "gate: the install branch is pushed once by a human with --no-verify." >&2
+    rm -f "$gate"
+    status=1
+    continue
+  fi
+  echo "gate: checking ${remote_ref#refs/heads/} at ${local_sha:0:7} against $remote main ${base:0:7}" >&2
+  bash "$gate" "$base" "$local_sha" < /dev/null || status=1
+  rm -f "$gate"
+done 3<<< "$input"
+
+[ "$status" -eq 0 ] || echo "gate: push blocked" >&2
+exit "$status"

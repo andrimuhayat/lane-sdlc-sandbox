@@ -1,0 +1,33 @@
+# .github/CODEOWNERS
+#
+# With "Require review from Code Owners" on, GitHub blocks merge until an
+# owner of every changed file approves. Later lines win.
+# Keep the high-risk entries in sync with paths.high-risk in risk-tiers.yml.
+#
+# Sole maintainer: GitHub refuses self-approval, so the protect-main ruleset
+# (G7) gives repository admins a bypass in pull_request mode. Merges still
+# go through a PR. A second human reviewer replaces the bypass later.
+
+# Default
+*                   @andrimuhayat
+
+# High-risk paths
+/src/auth/          @andrimuhayat
+/src/payments/      @andrimuhayat
+/src/claims/        @andrimuhayat
+**/pii/             @andrimuhayat
+/db/migrations/     @andrimuhayat
+/api/public/        @andrimuhayat
+/openapi*.yaml      @andrimuhayat
+/openapi*.yml       @andrimuhayat
+/infra/             @andrimuhayat
+/terraform/         @andrimuhayat
+
+# Agent and pipeline control files
+/risk-tiers.yml     @andrimuhayat
+/.mcp.json          @andrimuhayat
+/AGENTS.md          @andrimuhayat
+/CLAUDE.md          @andrimuhayat
+/.claude/           @andrimuhayat
+/.github/           @andrimuhayat
+/.githooks/         @andrimuhayat

@@ -1,0 +1,58 @@
+# risk-tiers.yml — lane rules for the agentic SDLC (v1)
+#
+# Location: repository root.
+# The classify step reads this file from the PR's base commit, so a PR
+# cannot change the rules it is judged by.
+#
+# Lane = highest of (path lane, size lane, lane:* label). Labels only raise.
+# Keep paths.high-risk in sync with the high-risk entries in .github/CODEOWNERS.
+#
+# Pattern syntax: Python fnmatch. "*" matches across "/" too,
+# so "src/auth/*" covers every file under src/auth/.
+
+version: 1
+
+fast_max_lines: 50          # above this, at least standard
+size_cap_lines: 400         # above this, classify fails unless the PR has the label below
+size_cap_exception_label: size-cap-exception
+
+# Lines in these files do not count toward PR size.
+size_exclude:
+  - "*.lock"
+  - "package-lock.json"
+  - "pnpm-lock.yaml"
+  - "yarn.lock"
+  - "poetry.lock"
+  - "*.snap"
+  - "*__snapshots__/*"
+  - "*/generated/*"
+
+paths:
+  high-risk:
+    - "src/auth/*"
+    - "src/payments/*"
+    - "src/claims/*"
+    - "pii/*"
+    - "*/pii/*"
+    - "db/migrations/*"
+    - "api/public/*"
+    - "openapi*.yaml"
+    - "openapi*.yml"
+    - "infra/*"
+    - "terraform/*"
+    - "risk-tiers.yml"
+    - ".mcp.json"
+    - "AGENTS.md"
+    - "CLAUDE.md"
+    - ".claude/*"
+    - ".github/*"
+    - ".githooks/*"
+  standard:
+    - "package.json"
+    - "*/package.json"
+    - "requirements*.txt"
+    - "*/requirements*.txt"
+    - "pyproject.toml"
+    - "Dockerfile"
+    - "*/Dockerfile"
+    - "config/*"
