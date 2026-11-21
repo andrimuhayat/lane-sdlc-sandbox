@@ -51,7 +51,8 @@
     "network": {
       "allowedDomains": [
         "github.com",
-        "api.github.com"
+        "api.github.com",
+        "api.anthropic.com"
       ]
     }
   }
