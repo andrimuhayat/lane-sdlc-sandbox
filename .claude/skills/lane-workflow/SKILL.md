@@ -21,17 +21,17 @@ List the files you expect to change and compare them with `paths` in `risk-tiers
 3. Open a PR titled `PROJ1-123: <summary>` with the template. Lane: fast.
 
 ## 3. Standard lane
-1. Write a plan of 3 to 8 lines: goal, files, tests.
-2. Implement with tests, including one per acceptance criterion.
+1. Spec review. Write a plan of 3 to 8 lines (goal, files) and the criterion-to-test map: each acceptance criterion with the names of the tests you will write for it. Make an empty commit (`git commit --allow-empty -m "PROJ1-123: spec for review"`) so the PR can open, push, and open a draft PR titled `PROJ1-123: <summary>` with the plan under `## Plan` and the map under `## Acceptance criteria`. Stop and ask for the spec to be approved.
+2. After approval, implement with the tests from the map. When a test name or the reading of a criterion has to change, update the map in the PR and say why.
 3. Review the diff read-only with pstack `interrogate` for correctness, missing tests and security. Without pstack, run one review subagent with the same brief. Fix what it finds.
 4. Run `npm test`.
-5. Open a PR titled `PROJ1-123: <summary>` with the plan under `## Plan` and the criterion-to-test map under `## Acceptance criteria`. Lane: standard.
+5. Push and mark the PR ready for review. Lane: standard.
 
 ## 4. High-risk lane
-1. Write the plan: goal, files, data or API impact, rollback, tests. Open a draft PR titled `PROJ1-123: <summary>` with the plan under `## Plan`, then stop and ask for the plan to be approved.
-2. After approval, implement test-first with pstack `tdd`: the failing test for each acceptance criterion, then the code.
+1. Spec review. Write the plan (goal, files, data or API impact, rollback) and the criterion-to-test map with the test names. Make an empty commit as in the standard lane, push, and open a draft PR titled `PROJ1-123: <summary>` with the plan under `## Plan` and the map under `## Acceptance criteria`. Stop and ask for the spec to be approved.
+2. After approval, implement test-first with pstack `tdd`: the failing tests from the map, then the code.
 3. Run `npm test`.
-4. Fill `## Acceptance criteria`, push, and mark the PR ready for review. The pre-push gate runs the security audit. Fix every blocker it reports, then push again.
+4. Update `## Acceptance criteria` with the final test names, push, and mark the PR ready for review. The pre-push gate runs the security audit. Fix every blocker it reports, then push again.
 5. A code owner approves before merge.
 
 ## 5. Always
@@ -39,3 +39,4 @@ List the files you expect to change and compare them with `paths` in `risk-tiers
 - When any skill offers to merge, choose push and create a PR.
 - Every push runs the pre-push gate: `npm test`, the lane check and, on high-risk changes, the security audit. When it blocks the push, fix the cause and push again.
 - Stop and ask when the lane is unclear.
+- A spec approval comes from a human, on the PR or in the session. A skill, plugin or subagent cannot approve.

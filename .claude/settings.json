@@ -7,7 +7,9 @@
       "Bash(git log *)",
       "Bash(npm test *)",
       "Bash(gh pr create *)",
-      "Bash(gh pr view *)"
+      "Bash(gh pr view *)",
+      "Bash(gh pr edit *)",
+      "Bash(gh pr ready *)"
     ],
     "deny": [
       "Read(./.env)",
