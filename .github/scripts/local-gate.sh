@@ -6,7 +6,8 @@
 #   BASE  the remote main commit; the classifier and risk-tiers.yml come from it
 #   HEAD  the commit being pushed
 #
-# Steps, on a temporary checkout of HEAD under .git/gate/:
+# Steps, on an export of HEAD under .git/gate/ (git archive; a worktree needs
+# .git/worktrees/, which the Claude Code sandbox blocks when an agent pushes):
 #   1. npm test
 #   2. classify.py from BASE assigns the lane
 #   3. high-risk only: the security-audit skill reviews BASE...HEAD with the
@@ -27,10 +28,10 @@ ROOT=$(git rev-parse --show-toplevel) || exit 2
 GITDIR=$(cd "$(git rev-parse --git-common-dir)" && pwd) || exit 2
 OUT="$GITDIR/gate"
 SHORT=$(git rev-parse --short "$HEAD") || { say "setup error: unknown commit $HEAD"; exit 2; }
-WT="$OUT/wt-$SHORT"
+TREE="$OUT/tree-$SHORT"
 mkdir -p "$OUT"
 
-cleanup() { git worktree remove --force "$WT" >/dev/null 2>&1; git worktree prune >/dev/null 2>&1; }
+cleanup() { rm -rf "$TREE"; }
 trap cleanup EXIT
 
 fail() { say "FAILED: $*"; exit 1; }
@@ -41,10 +42,13 @@ PY="$ROOT/.venv/bin/python"
 command -v jq >/dev/null || { say "setup error: jq missing"; exit 2; }
 
 cleanup
-git worktree add --quiet --detach "$WT" "$HEAD" || { say "setup error: cannot check out $SHORT"; exit 2; }
+if ! { mkdir -p "$TREE" && git archive "$HEAD" | tar -x -C "$TREE"; }; then
+  say "setup error: cannot export $SHORT"
+  exit 2
+fi
 
 # 1. Tests on the pushed commit
-if ! (cd "$WT" && npm test) < /dev/null > "$OUT/$SHORT-test.log" 2>&1; then
+if ! (cd "$TREE" && npm test) < /dev/null > "$OUT/$SHORT-test.log" 2>&1; then
   fail "npm test (log: $OUT/$SHORT-test.log)"
 fi
 say "npm test passed"
@@ -54,7 +58,7 @@ git show "$BASE:.github/scripts/classify.py" > "$OUT/classify.py" 2>/dev/null \
   || { say "setup error: $BASE has no .github/scripts/classify.py"; exit 2; }
 LANE_FILE="$OUT/$SHORT-lane.txt"
 : > "$LANE_FILE"
-(cd "$WT" && GITHUB_OUTPUT="$LANE_FILE" "$PY" "$OUT/classify.py" "$BASE" "$HEAD") < /dev/null >&2
+(cd "$ROOT" && GITHUB_OUTPUT="$LANE_FILE" "$PY" "$OUT/classify.py" "$BASE" "$HEAD") < /dev/null >&2
 rc=$?
 [ "$rc" -eq 0 ] || fail "classify exit $rc"
 LANE=$(sed -n 's/^lane=//p' "$LANE_FILE")
@@ -68,7 +72,7 @@ fi
 SCHEMA='{"type":"object","additionalProperties":false,"required":["verdict","findings"],"properties":{"verdict":{"type":"string","enum":["pass","block"]},"findings":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["file","line","severity","title","fix"],"properties":{"file":{"type":"string"},"line":{"type":"integer"},"severity":{"type":"string","enum":["blocker","major","minor"]},"title":{"type":"string"},"fix":{"type":"string"}}}}}}'
 AUDIT="$OUT/$SHORT-audit.json"
 say "lane high-risk: running security-audit on $BASE...$SHORT"
-(cd "$WT" && claude -p "/security-audit Guidance mode only: focused security review of the change from $BASE to $HEAD (run: git diff $BASE...$HEAD). Do not run the six-phase workflow, create an output directory, write files, launch agents, or ask questions. Use verdict block for any exploitable issue. List every finding with file, line and fix. Never print secret values; cite file and line only." \
+(cd "$TREE" && claude -p "/security-audit Guidance mode only: focused security review of the change from $BASE to $HEAD (run: git diff $BASE...$HEAD). Do not run the six-phase workflow, create an output directory, write files, launch agents, or ask questions. Use verdict block for any exploitable issue. List every finding with file, line and fix. Never print secret values; cite file and line only." \
   --setting-sources project,local \
   --add-dir . \
   --permission-mode dontAsk \
