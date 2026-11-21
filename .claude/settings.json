@@ -33,16 +33,26 @@
       "Bash(git push -f *)",
       "Bash(git push --force-with-lease *)",
       "Bash(git push origin main *)",
-      "Bash(git push origin master *)"
+      "Bash(git push origin master *)",
+      "Edit(./.githooks/**)",
+      "Bash(git push --no-verify *)",
+      "Bash(git push * --no-verify*)",
+      "Bash(git -c *)",
+      "Bash(git config *)"
     ]
   },
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
-    "excludedCommands": ["gh"],
+    "excludedCommands": [
+      "gh"
+    ],
     "network": {
-      "allowedDomains": ["github.com", "api.github.com"]
+      "allowedDomains": [
+        "github.com",
+        "api.github.com"
+      ]
     }
   }
 }

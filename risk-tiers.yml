@@ -46,6 +46,7 @@ paths:
     - "CLAUDE.md"
     - ".claude/*"
     - ".github/*"
+    - ".githooks/*"
   standard:
     - "package.json"
     - "*/package.json"

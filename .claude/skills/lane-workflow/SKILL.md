@@ -31,10 +31,11 @@ List the files you expect to change and compare them with `paths` in `risk-tiers
 1. Write the plan: goal, files, data or API impact, rollback, tests. Open a draft PR titled `PROJ1-123: <summary>` with the plan under `## Plan`, then stop and ask for the plan to be approved.
 2. After approval, implement test-first with pstack `tdd`: the failing test for each acceptance criterion, then the code.
 3. Run `npm test`.
-4. Fill `## Acceptance criteria` and mark the PR ready for review. CI runs the security audit. Fix every blocker it reports.
+4. Fill `## Acceptance criteria`, push, and mark the PR ready for review. The pre-push gate runs the security audit. Fix every blocker it reports, then push again.
 5. A code owner approves before merge.
 
 ## 5. Always
 - One implementer per story. Parallel stories use separate branches.
 - When any skill offers to merge, choose push and create a PR.
+- Every push runs the pre-push gate: `npm test`, the lane check and, on high-risk changes, the security audit. When it blocks the push, fix the cause and push again.
 - Stop and ask when the lane is unclear.

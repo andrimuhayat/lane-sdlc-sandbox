@@ -1,6 +1,6 @@
 """Behaviour tests for classify.py: each test builds a throwaway git repo,
 commits risk-tiers.yml on a base branch, commits a change on a PR branch and
-runs the script the way CI does."""
+runs the script the way the gate does."""
 
 import os
 import shutil

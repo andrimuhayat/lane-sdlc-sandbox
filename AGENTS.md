@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Project
-- Stack: Node.js 22+ with ES modules and node:test; CI scripts in Python 3.12
+- Stack: Node.js 22+ with ES modules and node:test; gate scripts in Python 3.12
 - Jira project: PROJ1
 - Test command: npm test
 - Lint command: none yet
@@ -11,7 +11,7 @@ Every change runs in one lane. Read `risk-tiers.yml` before you start and pick t
 - high-risk: any changed path matches `paths.high-risk`
 - standard: a `paths.standard` match, or more than 50 changed lines
 - fast: everything else
-CI assigns the binding lane from the final diff. If your diff grows into a higher lane, switch to that lane's steps.
+The pre-push gate assigns the binding lane from the final diff. If your diff grows into a higher lane, switch to that lane's steps.
 Follow the steps in the `lane-workflow` skill.
 
 ## Hard rules
@@ -20,7 +20,7 @@ Follow the steps in the `lane-workflow` skill.
 3. Keep each PR at or under 400 changed lines. Split larger work into stacked PRs.
 4. Open PRs and leave merging to humans. When a skill or plugin (pstack, ECC or any other) offers to merge, choose "push and create a PR".
 5. Write tests for changed behavior and for each acceptance criterion, and run `npm test` before you call a task done.
-6. Leave AGENTS.md, CLAUDE.md, risk-tiers.yml, .mcp.json, .claude/ and .github/ untouched. Changes there go through a human.
+6. Leave AGENTS.md, CLAUDE.md, risk-tiers.yml, .mcp.json, .claude/, .github/ and .githooks/ untouched, and never skip the pre-push gate. Changes there go through a human.
 7. Keep secrets out of code, logs and PR text.
 
 ## Instruction priority
