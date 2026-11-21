@@ -3,8 +3,9 @@
 # Enable once per clone: git config core.hooksPath .githooks
 #
 # The gate script comes from the remote's main, so a branch cannot change the
-# gate that judges it. Pushes to main are skipped: main changes through reviewed
-# PRs, and the protect-main ruleset (G7) blocks direct pushes on GitHub.
+# gate that judges it. A push to main from a Claude Code session (CLAUDECODE
+# set) is blocked. A human's push to main skips the gate: main changes through
+# reviewed PRs, and the protect-main ruleset (G7) blocks direct pushes on GitHub.
 # Until the remote main holds the gate, every branch push fails here; a human
 # pushes the install branch once with --no-verify.
 
@@ -22,6 +23,11 @@ while read -r _ local_sha remote_ref _ <&3; do
   [ -n "$local_sha" ] || continue
   [ "$local_sha" = "$zero" ] && continue          # branch deletion
   if [ "$remote_ref" = "refs/heads/main" ]; then
+    if [ -n "${CLAUDECODE:-}" ]; then
+      echo "gate: a Claude Code session may not push main; push a branch and open a PR" >&2
+      status=1
+      continue
+    fi
     echo "gate: push to main, gate skipped" >&2
     continue
   fi
