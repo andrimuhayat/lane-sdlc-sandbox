@@ -1,0 +1,13 @@
+{
+  "name": "lane-sdlc-sandbox",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sandbox for the lane-based agentic SDLC setup",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}
